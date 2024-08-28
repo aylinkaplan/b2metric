@@ -36,6 +36,32 @@ def read_books(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     return books
 
 
+# Update a Book
+@app.put("/books/{book_id}", response_model=schemas.Book)
+def update_book(book_id: int, book_update: schemas.BookCreate, db: Session = Depends(get_db)):
+    db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not db_book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    db_book.title = book_update.title
+    db_book.author = book_update.author
+    db.commit()
+    db.refresh(db_book)
+    return db_book
+
+
+# Delete a Book
+@app.delete("/books/{book_id}", response_model=schemas.Book)
+def delete_book(book_id: int, db: Session = Depends(get_db)):
+    db_book = db.query(models.Book).filter(models.Book.id == book_id).first()
+    if not db_book:
+        raise HTTPException(status_code=404, detail="Book not found")
+
+    db.delete(db_book)
+    db.commit()
+    return db_book
+
+
 # Create a new patron
 @app.post("/patrons/", response_model=schemas.Patron)
 def create_patron(patron: schemas.PatronCreate, db: Session = Depends(get_db)):
@@ -51,6 +77,32 @@ def create_patron(patron: schemas.PatronCreate, db: Session = Depends(get_db)):
 def read_patrons(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     patrons = db.query(models.Patron).offset(skip).limit(limit).all()
     return patrons
+
+
+# Update a Patron
+@app.put("/patrons/{patron_id}", response_model=schemas.Patron)
+def update_patron(patron_id: int, patron_update: schemas.PatronCreate, db: Session = Depends(get_db)):
+    db_patron = db.query(models.Patron).filter(models.Patron.id == patron_id).first()
+    if not db_patron:
+        raise HTTPException(status_code=404, detail="Patron not found")
+
+    db_patron.name = patron_update.name
+    db_patron.email = patron_update.email
+    db.commit()
+    db.refresh(db_patron)
+    return db_patron
+
+
+# Delete a Patron
+@app.delete("/patrons/{patron_id}", response_model=schemas.Patron)
+def delete_patron(patron_id: int, db: Session = Depends(get_db)):
+    db_patron = db.query(models.Patron).filter(models.Patron.id == patron_id).first()
+    if not db_patron:
+        raise HTTPException(status_code=404, detail="Patron not found")
+
+    db.delete(db_patron)
+    db.commit()
+    return db_patron
 
 
 # Check out a book
@@ -108,10 +160,10 @@ def read_checked_out_books(skip: int = 0, limit: int = 10, db: Session = Depends
     return books
 
 
-# List all overdue books (simplified for demo purposes)
+# List all overdue books
 @app.get("/books/overdue/", response_model=list[schemas.Book])
 def read_overdue_books(db: Session = Depends(get_db)):
-    overdue_date = datetime.utcnow()  # Modify as needed to determine what qualifies as overdue
+    overdue_date = datetime.utcnow()
     transactions = db.query(models.Transaction).filter(
         models.Transaction.return_date.is_(None),
         models.Transaction.checkout_date < overdue_date).all()

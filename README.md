@@ -45,12 +45,9 @@ docker logs <celery_beat_container_id>
 Replace <celery_beat_container_id> with the actual container ID or name for the Celery-Beat service.
 
 #### Test Task Execution
-To test Celery tasks manually, you can run the following code snippet:
+To test Celery tasks manually, you can run use:
 
 
 ```bash
-from app.celery_config import celery
-
-result = celery.send_task('app.tasks.send_overdue_reminders')
-result.get(timeout=10)
+docker-compose run web python test_celery.py
 ```
