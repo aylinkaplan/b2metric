@@ -45,7 +45,7 @@ docker logs <celery_beat_container_id>
 Replace <celery_beat_container_id> with the actual container ID or name for the Celery-Beat service.
 
 #### Test Task Execution
-To test Celery tasks manually, you can run use:
+To test Celery tasks manually, use the following command:
 
 
 ```bash
